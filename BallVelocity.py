@@ -9,8 +9,8 @@ def GetVelocity_ImageCoords(frame1,frame2,framerate):
     coords1 = GetBallCoords_ImageCoords(frame1)
     coords2 = GetBallCoords_ImageCoords(frame2)
     # Coords in unsigned uint16, cannot subtract, cast to int
-    dx = int(coords1[0])-int(coords2[0])
-    dy = int(coords1[1])-int(coords2[1])
+    dx = int(coords2[0])-int(coords1[0])
+    dy = int(coords2[1])-int(coords1[1])
     print(f"(dx,dy): ({dx},{dy})")
     vx = dx * framerate
     vy = dy * framerate
@@ -24,3 +24,6 @@ if __name__ == '__main__':
     print(GetBallCoords_ImageCoords(img1))
     print(GetBallCoords_ImageCoords(img2))
     print(GetVelocity_ImageCoords(img1,img2,30))
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
