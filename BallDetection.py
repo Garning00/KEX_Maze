@@ -34,10 +34,14 @@ def processDiff(img1, img2):
 
 """ Can mask without reference and homography """
 def processBlur(img):
+    #cv2.imshow("test", img)
     img = cv2.medianBlur(img,15)
-    _, img = cv2.threshold(img, 90, 255, cv2.THRESH_BINARY_INV)
-    img = cv2.medianBlur(img,3)
-    img = cv2.dilate(img, None, iterations=1)
+    #cv2.imshow("innan thresh",img)
+    _, img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV)
+    #cv2.imshow("efter thresh", img)
+    img = cv2.medianBlur(img,5)
+    img = cv2.dilate(img, None, iterations=3)
+    img = cv2.medianBlur(img, 9)
     return img
 
 # How to detect ball coords?
@@ -49,7 +53,7 @@ def detectCircles(img, imgOut):
     # https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
     detected_circles = cv2.HoughCircles(img,  
                    cv2.HOUGH_GRADIENT, 1, 20, param1 = 50, 
-               param2 = 10, minRadius = 3, maxRadius = 10)
+               param2 = 10, minRadius = 1, maxRadius = 10)
     # param2 ensures better circles --> higher value (10 quite low?) 
   
     # Draw circles that are detected. 
@@ -71,7 +75,9 @@ def detectCircles(img, imgOut):
 
         # Display detected circles
         cv2.imshow("Detected Circles", imgOut)
-        return detected_circles
+
+        """ Add function to only return most likely to be the ball if there's more than 1 circle """
+        return detected_circles[0][0] # Only outputs 1st circle for now
     else:
         print("No circles detected.")
         return None
@@ -131,23 +137,29 @@ if __name__ == '__main__':
     pathImgNoBall = "KEX_Bilder/Top-Toy Labyrint/Flat_noBall_Flash.jpg"
     pathImg1 = "KEX_Bilder/Top-Toy Labyrint/Flat_Ball_Flash.jpg"
     pathImgblob = "KEX_Bilder/simple_blob-2.jpg"
+    pathImgTilt = "KEX_Bilder/Top-Toy Labyrint/Tilted_Ball_Flash.jpg"
 
     # Import images
     imgNoBall = cv2.imread(pathImgNoBall, cv2.IMREAD_GRAYSCALE)
     img1 = cv2.imread(pathImg1, cv2.IMREAD_GRAYSCALE)
     imgblob = cv2.imread(pathImgblob,cv2.IMREAD_GRAYSCALE)
-
+    imgTilt = cv2.imread(pathImgTilt,cv2.IMREAD_GRAYSCALE)
 
     # Resize images
     scale = 0.1
     imgNoBall = cv2.resize(imgNoBall, (0, 0), fx = scale, fy = scale)
     img1 = cv2.resize(img1, (0, 0), fx = scale, fy = scale)
+    imgTilt = cv2.resize(imgTilt, (0, 0), fx=scale, fy=scale)
 
-    cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
+    #cv2.imshow("Tilt",imgTilt)
+
+    #cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
     cv2.imshow("Blur-process",processBlur(img1))
+    cv2.imshow("Blur-process Tilted", processBlur(imgTilt))
     print(detectCircles(processBlur(img1), img1))
-    print(detectCircles(processBlur(imgNoBall),imgNoBall))
-    print(GetBallCoords_ImageCoords(img1))
+    #print(detectCircles(processBlur(imgNoBall),imgNoBall))
+    #print(detectCircles(processBlur(imgTilt), imgTilt))
+    #print(GetBallCoords_ImageCoords(img1))
     #cv2.imshow("Detected Circles - processBlur",detectCircles(processBlur(img1),processBlur(img1)))
     #cv2.imshow("Detected Cirles - processDiff",detectCircles(processDiff(imgNoBall,img1),processDiff(imgNoBall,img1)))
 
