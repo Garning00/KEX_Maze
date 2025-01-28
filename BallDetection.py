@@ -1,5 +1,7 @@
 import cv2
 import numpy as np # for detectCircles
+from chardet import detect
+from google.protobuf.struct_pb2 import NullValue
 
 """ mask with difference from plane without ball present, requires homography to account for tilting plane """
 def processDiff(img1, img2):
@@ -42,6 +44,7 @@ def processBlur(img):
 # FindContours, SimpleBlobDetector, HoughCircles
 
 """ Detects circles hopefully well, unreliable without binary mask"""
+""" inputs image to detect and image to print circles to, returns detected circles coords & radius"""
 def detectCircles(img, imgOut):
     # https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
     detected_circles = cv2.HoughCircles(img,  
@@ -65,7 +68,13 @@ def detectCircles(img, imgOut):
       
             # Draw a small circle (of radius 1) to show the center. 
             cv2.circle(imgOut, (a, b), 1, (50, 0, 0), 1)
-    return imgOut
+
+        # Display detected circles
+        cv2.imshow("Detected Circles", imgOut)
+        return detected_circles
+    else:
+        print("No circles detected.")
+        return None
 
 """ Have not gotten this to work yet"""
 def detectBlobs(img,imgOut):
@@ -105,33 +114,52 @@ def detectBlobs(img,imgOut):
                 cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0, 100, 255), 1)
     
     # Show blobs 
-    cv2.imshow("Filtering Circular Blobs Only", blobs) 
+    cv2.imshow("Filtering Circular Blobs Only", blobs)
 
-# Import images
-imgNoBall = cv2.imread("E:\Windows User Files\Documents\Plugg\KEX\KEX_Bilder\Flat_noBall_Flash.jpg", cv2.IMREAD_GRAYSCALE)
-img1 = cv2.imread("E:\Windows User Files\Documents\Plugg\KEX\KEX_Bilder\Flat_Ball_Flash.jpg", cv2.IMREAD_GRAYSCALE)
-imgblob = cv2.imread("E:\Windows User Files\Documents\Plugg\KEX\simple_blob-2.jpg",cv2.IMREAD_GRAYSCALE)
+"""" Returns ball center coords relative to the image pixel coordinate system"""
+def GetBallCoords_ImageCoords(img):
+    # Resize images
+    scale = 0.1
+    img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
 
-
-# Resize images
-scale = 0.1
-imgNoBall = cv2.resize(imgNoBall, (0, 0), fx = scale, fy = scale)
-img1 = cv2.resize(img1, (0, 0), fx = scale, fy = scale)
-
-cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
-cv2.imshow("Blur-process",processBlur(img1))
-cv2.imshow("Detected Circles - processBlur",detectCircles(processBlur(img1),processBlur(img1)))
-cv2.imshow("Detected Cirles - processDiff",detectCircles(processDiff(imgNoBall,img1),processDiff(imgNoBall,img1)))
-
-#detectBlobs(processBlur(img1),img1)
-#detectBlobs(imgblob,imgblob)
-
-#cv2.imshow("blob circles detected",detectCircles(imgblob,imgblob))
+    img = processBlur(img)
+    return detectCircles(img,img)
 
 
-print(type(img1))
+if __name__ == '__main__':
+    #Image paths (/ on mac & linux and \ on PC)
+    pathImgNoBall = "KEX_Bilder/Top-Toy Labyrint/Flat_noBall_Flash.jpg"
+    pathImg1 = "KEX_Bilder/Top-Toy Labyrint/Flat_Ball_Flash.jpg"
+    pathImgblob = "KEX_Bilder/simple_blob-2.jpg"
+
+    # Import images
+    imgNoBall = cv2.imread(pathImgNoBall, cv2.IMREAD_GRAYSCALE)
+    img1 = cv2.imread(pathImg1, cv2.IMREAD_GRAYSCALE)
+    imgblob = cv2.imread(pathImgblob,cv2.IMREAD_GRAYSCALE)
 
 
-# Wait for input and close
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    # Resize images
+    scale = 0.1
+    imgNoBall = cv2.resize(imgNoBall, (0, 0), fx = scale, fy = scale)
+    img1 = cv2.resize(img1, (0, 0), fx = scale, fy = scale)
+
+    cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
+    cv2.imshow("Blur-process",processBlur(img1))
+    print(detectCircles(processBlur(img1), img1))
+    print(detectCircles(processBlur(imgNoBall),imgNoBall))
+    print(GetBallCoords_ImageCoords(img1))
+    #cv2.imshow("Detected Circles - processBlur",detectCircles(processBlur(img1),processBlur(img1)))
+    #cv2.imshow("Detected Cirles - processDiff",detectCircles(processDiff(imgNoBall,img1),processDiff(imgNoBall,img1)))
+
+    #detectBlobs(processBlur(img1),img1)
+    #detectBlobs(imgblob,imgblob)
+
+    #cv2.imshow("blob circles detected",detectCircles(imgblob,imgblob))
+
+
+    print(type(img1))
+
+
+    # Wait for input and close
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
