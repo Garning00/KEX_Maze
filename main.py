@@ -1,30 +1,42 @@
 """" import relevant scripts and run here """
 import cv2
 from BallVelocity import GetVelocity_ImageCoords
+from BallDetection import processBlur
+
+def prepareImage(img):
+    scale = 0.1
+    img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
+    # Crop
+    img = img[24:200, 88:305]
+
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return img
 
 if __name__ == '__main__':
-    videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash.mp4"
+    videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
 
     cap = cv2.VideoCapture(videoPath)
     cap.set(3, 640)     # Width
     cap.set(4, 480)     # Height
     cap.set(10, 150)    # Brightness
 
+    # Initiate first frame to compare distance
+    success, imgPast = cap.read()
+    imgPast = prepareImage(imgPast)
+
     while True:
         success, img = cap.read()
-        #Rescale
-        scale = 0.1
-        img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
-        #Crop
-        img = img[:, 20:300]
 
-        imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        imgCurrent = prepareImage(img)
 
-        frameCurrent = imgGray
+        try:
+            print(GetVelocity_ImageCoords(imgPast,imgCurrent,60))
+        except TypeError:
+            print("Returned None")
 
-        #GetVelocity_ImageCoords()
+        cv2.imshow("Video", imgCurrent)
 
-        cv2.imshow("Video", img)
+        imgPast = imgCurrent   # Set previous frame variable for next loop
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break

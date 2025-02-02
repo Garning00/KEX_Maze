@@ -35,9 +35,9 @@ def processDiff(img1, img2):
 """ Can mask without reference and homography """
 def processBlur(img):
     #cv2.imshow("test", img)
-    img = cv2.medianBlur(img,15)
+    img = cv2.medianBlur(img,13) # 15 för stillbild 13 för video02
     #cv2.imshow("innan thresh",img)
-    _, img = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV)
+    _, img = cv2.threshold(img, 120, 255, cv2.THRESH_BINARY_INV) # Thresh 100 funkar på stillbilderna men behöver 120 för video02
     #cv2.imshow("efter thresh", img)
     img = cv2.medianBlur(img,5)
     img = cv2.dilate(img, None, iterations=3)
@@ -124,9 +124,9 @@ def detectBlobs(img,imgOut):
 
 """" Returns ball center coords relative to the image pixel coordinate system"""
 def GetBallCoords_ImageCoords(img):
-    # Resize images
-    scale = 0.1
-    img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
+    # Resize images (Removed, process image and crop correctly beforehand)
+    #scale = 0.1
+    #img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
 
     img = processBlur(img)
     return detectCircles(img,img)
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     #cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
     cv2.imshow("Blur-process",processBlur(img1))
     cv2.imshow("Blur-process Tilted", processBlur(imgTilt))
-    print(detectCircles(processBlur(img1), img1))
+    #print(detectCircles(processBlur(img1), img1))
     #print(detectCircles(processBlur(imgNoBall),imgNoBall))
     #print(detectCircles(processBlur(imgTilt), imgTilt))
     #print(GetBallCoords_ImageCoords(img1))
