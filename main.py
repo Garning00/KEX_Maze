@@ -1,7 +1,6 @@
 """" import relevant scripts and run here """
 import cv2
 from BallVelocity import GetVelocity_ImageCoords
-from BallDetection import processBlur
 
 def prepareImage(img):
     scale = 0.1

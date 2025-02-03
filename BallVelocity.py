@@ -14,6 +14,11 @@ def GetVelocity_ImageCoords(frame1,frame2,framerate):
     print(f"(dx,dy): ({dx},{dy})")
     vx = dx * framerate
     vy = dy * framerate
+
+    # Debug draw velocity
+    cv2.line(frame2, (coords1[0], coords1[1]),(coords2[0], coords2[1]),(127,0,0),2)
+    cv2.imshow("Velocity", frame2)
+
     return [vx, vy] # OBS speed in pixels/s
 
 if __name__ == '__main__':

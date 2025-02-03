@@ -65,7 +65,7 @@ def detectCircles(img, imgOut):
         for pt in detected_circles[0, :]: 
             a, b, r = pt[0], pt[1], pt[2] 
             
-            print(f"Circle at coords: ({a}, {b}) with radius: {r}")
+            #print(f"Circle at coords: ({a}, {b}) with radius: {r}")
             
             # Draw the circumference of the circle. 
             cv2.circle(imgOut, (a, b), r, (127, 0, 0), 2) # Grey ring (color not visible in binary mask)
