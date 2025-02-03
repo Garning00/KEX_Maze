@@ -1,7 +1,5 @@
 import cv2
 import numpy as np # for detectCircles
-from chardet import detect
-from google.protobuf.struct_pb2 import NullValue
 
 """ mask with difference from plane without ball present, requires homography to account for tilting plane """
 def processDiff(img1, img2):
