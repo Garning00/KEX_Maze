@@ -23,15 +23,23 @@ if __name__ == '__main__':
     success, imgPast = cap.read()
     imgPast = prepareImage(imgPast)
 
+    lastValidImgCoords = None
+    lastValidImgVelocity = [0, 0]
+
     while True:
         success, img = cap.read()
 
         imgCurrent = prepareImage(img)
 
-        try:
-            print(GetVelocity_ImageCoords(imgPast,imgCurrent,60))
-        except TypeError:
-            print("Returned None")
+        lastValidImgVelocity, lastValidImgCoords = GetVelocity_ImageCoords(imgPast, imgCurrent, 60, lastValidImgCoords, lastValidImgVelocity)
+        print(f"LastVel: {lastValidImgVelocity} Last Coords: {lastValidImgCoords}")
+        # try:
+        #     velImgCoords = GetVelocity_ImageCoords(imgPast,imgCurrent,60)
+        #     #print(GetVelocity_ImageCoords(imgPast,imgCurrent,60))
+        # except TypeError:
+        #     print("TypeError")
+        # except SystemExit as e:
+        #     print("SystemExit raised: " + str(e.args[0]))
 
         cv2.imshow("Video", imgCurrent)
 
