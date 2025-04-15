@@ -50,4 +50,5 @@ This is the distance between the center points of the two top most markers in th
 * Filepath structures are different, use / on mac & linux and \ on PC.
 * Reading correct camera deviceID using OpenCV video capture, Linux uses something like: "/dev/video2" and a number (0) for Windows.
 * Selecting correct serial port name, Linux uses something like: "/dev/ttyACM0" and for Windows: "COM4".
-* 
+* Use same baudrate in Python as in the Arduino sketch.
+* On linux serial port must be granted permission using "sudo chmod a+rw /dev/ttyACM0" (replace with correct port name).
