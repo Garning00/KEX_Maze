@@ -32,6 +32,31 @@ def processDiff(img1, img2):
 
 """ Can mask without reference and homography """
 def processBlur(img):
+    # Settings Video02 (Top-Toy)
+        # blur kzise: 13 (15 för stillbild), thresh 120 max 255, blur kzise 5, dilate 3, blur kzise 9
+    img = cv2.medianBlur(img,3) # Blur får bort linjen
+    #cv2.imshow("innan thresh",img)
+
+    # Remove the dark holes using threshold and bitwise_or
+    _, imgHoles = cv2.threshold(img, 100, 255, cv2.THRESH_BINARY_INV) # Thresh 100 funkar på stillbilderna men behöver 120 för video02
+    #cv2.imshow("efter thresh", imgHoles)
+    imgHoles = cv2.dilate(imgHoles, None, iterations=2)
+    img = cv2.bitwise_or(img, imgHoles)
+    #img = cv2.medianBlur(img, 3)
+    #cv2.imshow("efter bitwise or", img)
+
+    # Get marble mask
+    _, img = cv2.threshold(img, 118, 255, cv2.THRESH_BINARY_INV)
+    #cv2.imshow("efter marble thresh", img)
+
+    #img = cv2.medianBlur(img,5)
+    img = cv2.dilate(img, None, iterations=3)
+    img = cv2.medianBlur(img, 9)
+    return img
+
+def processBlurTopToyPhoneCam(img):
+    # Settings Video02 (Top-Toy)
+        # blur kzise: 13 (15 för stillbild), thresh 120 max 255, blur kzise 5, dilate 3, blur kzise 9
     #cv2.imshow("test", img)
     img = cv2.medianBlur(img,13) # 15 för stillbild 13 för video02
     #cv2.imshow("innan thresh",img)
@@ -42,6 +67,23 @@ def processBlur(img):
     img = cv2.medianBlur(img, 9)
     return img
 
+""" Using light reflection in marble """
+def processLight(img):
+    #img = cv2.medianBlur(img, 1)
+
+    # Threshold whitest parts (Light reflection)
+    _, img = cv2.threshold(img, 250, 255, cv2.THRESH_BINARY)
+    # Lite lägre threshold så dyker reflektion i planet upp
+    # Måste hantera annat som dyker upp så som: sticker, skruvar och metallstavar!
+
+    cv2.imshow("processLight Thresh", img)
+
+    # Make little bigger for circle detetction (Maybe use other method now?)
+    img = cv2.dilate(img, None, iterations=5)
+    img = cv2.medianBlur(img, 9)
+
+    return img
+
 # How to detect ball coords?
 # FindContours, SimpleBlobDetector, HoughCircles
 
@@ -49,8 +91,10 @@ def processBlur(img):
 """ inputs image to detect and image to print circles to, returns detected circles coords & radius"""
 def detectCircles(img, imgOut):
     # https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
-    detected_circles = cv2.HoughCircles(img,  
-                   cv2.HOUGH_GRADIENT, 1, 20, param1 = 50, 
+
+    # Top-Toy, processBlur values 1, 20, 50, 10, 1, 10
+    detected_circles = cv2.HoughCircles(img,
+                   cv2.HOUGH_GRADIENT, 1, 30, param1 = 50,
                param2 = 10, minRadius = 1, maxRadius = 10)
     # param2 ensures better circles --> higher value (10 quite low?) 
   
@@ -126,7 +170,9 @@ def GetBallCoords_ImageCoords(img):
     #scale = 0.1
     #img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
 
-    img = processBlur(img)
+    #img = processBlur(img)
+    #img = processBlurTopToyPhoneCam(img)
+    img = processLight(img)
     return detectCircles(img,img)
 
 
@@ -136,24 +182,40 @@ if __name__ == '__main__':
     pathImg1 = "KEX_Bilder/Top-Toy Labyrint/Flat_Ball_Flash.jpg"
     pathImgblob = "KEX_Bilder/simple_blob-2.jpg"
     pathImgTilt = "KEX_Bilder/Top-Toy Labyrint/Tilted_Ball_Flash.jpg"
+    pathVideoLvl1 = "KEX_Bilder/BRIO Labyrint/Video_Lvl1.avi"
+    pathLvl1Center = "KEX_Bilder/BRIO Labyrint/Lvl2_Flat_Centered.png"
+    pathLvl1Tilted = "KEX_Bilder/BRIO Labyrint/Lvl2_Tilted.png"
 
     # Import images
     imgNoBall = cv2.imread(pathImgNoBall, cv2.IMREAD_GRAYSCALE)
     img1 = cv2.imread(pathImg1, cv2.IMREAD_GRAYSCALE)
     imgblob = cv2.imread(pathImgblob,cv2.IMREAD_GRAYSCALE)
     imgTilt = cv2.imread(pathImgTilt,cv2.IMREAD_GRAYSCALE)
+    imgLvl1Center = cv2.imread(pathLvl1Center,cv2.IMREAD_GRAYSCALE)
+    imgLvl1Tilted = cv2.imread(pathLvl1Tilted, cv2.IMREAD_GRAYSCALE)
 
     # Resize images
-    scale = 0.1
+    scale = 0.2
     imgNoBall = cv2.resize(imgNoBall, (0, 0), fx = scale, fy = scale)
     img1 = cv2.resize(img1, (0, 0), fx = scale, fy = scale)
     imgTilt = cv2.resize(imgTilt, (0, 0), fx=scale, fy=scale)
+    imgLvl1Center = cv2.resize(imgLvl1Center, (0, 0), fx=scale, fy=scale)
+    imgLvl1Tilted = cv2.resize(imgLvl1Tilted, (0, 0), fx=scale, fy=scale)
+
+    #Crop
+    #imgLvl1Center = imgLvl1Center[:,21:110]
 
     #cv2.imshow("Tilt",imgTilt)
 
     #cv2.imshow("Diff-process",processDiff(imgNoBall,img1))
-    cv2.imshow("Blur-process",processBlur(img1))
-    cv2.imshow("Blur-process Tilted", processBlur(imgTilt))
+    cv2.imshow("Original Centered", imgLvl1Center)
+    cv2.imshow("Original Tilted", imgLvl1Tilted)
+    cv2.imshow("Blur-process",processBlur(imgLvl1Center))
+    cv2.imshow("Light-process Centered",processLight(imgLvl1Center))
+    cv2.imshow("Light-process Tilted", processLight(imgLvl1Tilted))
+    detectCircles(processLight(imgLvl1Tilted),imgLvl1Tilted)
+
+    #cv2.imshow("Blur-process Tilted", processBlur(imgLvl1Tilted))
     #print(detectCircles(processBlur(img1), img1))
     #print(detectCircles(processBlur(imgNoBall),imgNoBall))
     #print(detectCircles(processBlur(imgTilt), imgTilt))
@@ -164,7 +226,7 @@ if __name__ == '__main__':
     #detectBlobs(processBlur(img1),img1)
     #detectBlobs(imgblob,imgblob)
 
-    #cv2.imshow("blob circles detected",detectCircles(imgblob,imgblob))
+    #detectCircles(imgblob,imgblob)
 
 
     print(type(img1))

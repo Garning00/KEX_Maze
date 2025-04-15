@@ -3,18 +3,23 @@ import cv2
 from BallVelocity import GetVelocity_ImageCoords
 
 def prepareImage(img):
-    scale = 0.1
+    scale = 0.2
     img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
+    cv2.imshow("Source", img)
+
     # Crop
-    img = img[24:200, 88:305]
+    img = img[:, 25:117]
 
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
 
 if __name__ == '__main__':
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
+    videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
+    deviceID = "/dev/video2"
+    framerate = 30
 
-    cap = cv2.VideoCapture(videoPath)
+    cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
     cap.set(4, 480)     # Height
     cap.set(10, 150)    # Brightness
@@ -23,7 +28,7 @@ if __name__ == '__main__':
     success, imgPast = cap.read()
     imgPast = prepareImage(imgPast)
 
-    lastValidImgCoords = None
+    lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
 
     while True:
@@ -31,7 +36,7 @@ if __name__ == '__main__':
 
         imgCurrent = prepareImage(img)
 
-        lastValidImgVelocity, lastValidImgCoords = GetVelocity_ImageCoords(imgPast, imgCurrent, 60, lastValidImgCoords, lastValidImgVelocity)
+        lastValidImgVelocity, lastValidImgCoords = GetVelocity_ImageCoords(imgPast, imgCurrent, framerate, lastValidImgCoords, lastValidImgVelocity)
         print(f"LastVel: {lastValidImgVelocity} Last Coords: {lastValidImgCoords}")
         # try:
         #     velImgCoords = GetVelocity_ImageCoords(imgPast,imgCurrent,60)
