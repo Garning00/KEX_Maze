@@ -10,7 +10,7 @@ def prepareImage(img):
     return img
 
 def prepareImageScaleCrop(img):
-    scale = 0.2
+    scale = 1
     img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
     #cv2.imshow("Source", img)
 
@@ -52,6 +52,7 @@ if __name__ == '__main__':
 
     lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
+    
 
     while True:
         success, img = cap.read()
@@ -59,7 +60,7 @@ if __name__ == '__main__':
         imgCurrent = prepareImage(img)
 
         lastValidImgVelocity, lastValidImgCoords = GetVelocity_ImageCoords(imgPast, imgCurrent, framerate, lastValidImgCoords, lastValidImgVelocity)
-        print(f"LastVel: {lastValidImgVelocity} Last Coords: {lastValidImgCoords}")
+        #print(f"LastVel: {lastValidImgVelocity} Last Coords: {lastValidImgCoords}")
         # try:
         #     velImgCoords = GetVelocity_ImageCoords(imgPast,imgCurrent,60)
         #     #print(GetVelocity_ImageCoords(imgPast,imgCurrent,60))
@@ -71,7 +72,8 @@ if __name__ == '__main__':
         # Convert ImgCoords and velocity to IRL units
         vel = lastValidImgCoords*px2mm
         pos = lastValidImgCoords*px2mm
-        print(f"V: {vel}mm/s Pos: {pos}mm")
+        #print(f"V: {vel}mm/s Pos: {pos}mm")
+        print(f"Pos: {pos}mm")
 
         # Send position to arduino via serial
         serialQuery(f"{pos[0]} {pos[1]}")

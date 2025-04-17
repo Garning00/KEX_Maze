@@ -73,11 +73,15 @@ def calcPx2mmConversion(markers, upperSideLength_mm):
 
 if __name__ == '__main__':
     # turn on cam
-    deviceID = "/dev/video2"
+    deviceID = 0 #"/dev/video2"
     webcam = cv2.VideoCapture(deviceID)
 
     while(True):
         markers = detectionLoop(webcam)
+
+        upperSideLength_mm = 290
+        px2mm = calcPx2mmConversion(markers,upperSideLength_mm)
+        print(px2mm)
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             print("Markers detected: ")
@@ -87,6 +91,4 @@ if __name__ == '__main__':
             break
 
     # Calculate lengths between markers (Only upper side length)
-    upperSideLength_mm = 290
-    px2mm = calcPx2mmConversion(markers,upperSideLength_mm)
-    print(px2mm)
+    

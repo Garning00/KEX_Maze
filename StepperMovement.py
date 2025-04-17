@@ -8,17 +8,17 @@ def move(message):
     ser.write(message.encode('ascii'))
     #ser.flush()
 
-serialName: str = '/dev/ttyACM0' #Linux port name
+serialName: str = "COM5"#'/dev/ttyACM0' #Linux port name
 baud: int = 19200
 ser = serial.Serial(serialName, baudrate=baud)#, rtscts=False, dsrdtr=False)  # open serial port
 sleep(1)
 
 if __name__ == '__main__':
-    #while(True):
-         #message = input()
-         #if message == 'stop':
-             #break
-         #move(message)
+    while(True):
+         message = input()
+         if message == 'stop':
+             break
+         move(message)
 
     #region Keyboard
     # Keyboard måste köras som root: sudo pycharm-community
