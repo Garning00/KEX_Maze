@@ -5,13 +5,20 @@ import serial
 from time import sleep
 
 def prepareImage(img):
+    img = prepareImageScaleCrop(img)
+    img = prepareImage2Gray(img)
+    return img
+
+def prepareImageScaleCrop(img):
     scale = 0.2
     img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
-    cv2.imshow("Source", img)
+    #cv2.imshow("Source", img)
 
     # Crop
-    #img = img[:, 25:117]
+    # img = img[:, 25:117]
+    return img
 
+def prepareImage2Gray(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     return img
 
@@ -22,7 +29,7 @@ def serialQuery(message):
 
 if __name__ == '__main__':
     # Initialize serial
-    serialName: str = '/dev/ttyACM0'  # Linux port name
+    serialName: str = 'COM5' #'/dev/ttyACM0'  # Linux port name
     baud: int = 19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
     sleep(1)
@@ -30,7 +37,7 @@ if __name__ == '__main__':
     # Import video and parameters
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
     videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
-    deviceID = "/dev/video2"
+    deviceID = 0 #"/dev/video2"
     framerate = 30
     px2mm = 1.5 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 

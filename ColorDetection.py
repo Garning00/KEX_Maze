@@ -2,11 +2,15 @@
 """ Returns relation from pixel to real world unit distance """
 """"Source color detection: https://agneya.medium.com/color-detection-using-python-and-opencv-8305c29d4a42"""
 
+from main import prepareImageScaleCrop
 import numpy as np
 import cv2
 
 def detectionLoop(webcam):
     _, imageFrame = webcam.read()
+
+    # Måste ha prepareimage här för att få samma pixel conversion rate.
+    imageFrame = prepareImageScaleCrop(imageFrame)
 
     # Convert BGR to HSV colorspace
     hsvFrame = cv2.cvtColor(imageFrame, cv2.COLOR_BGR2HSV)
