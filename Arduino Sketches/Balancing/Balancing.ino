@@ -41,10 +41,8 @@ void resetPosition(){
 }
 
 void setup() {
+  Serial.setTimeout(1); 
   Serial.begin(19200); 
-	// Serial.setTimeout(1); 
-
-  Serial.flush();
 
   // Initialize position
   resetPosition();
