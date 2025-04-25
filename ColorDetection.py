@@ -60,10 +60,6 @@ def detectionLoop(webcam):
     return markerCenters
 
 def calcPx2mmConversion(markers, upperSideLength_mm):
-    # Order markers
-    markers = sorted(markers, key=lambda x: (x[0], x[1]))
-    print("Markers sorted: ")
-    print(markers)
     # sideLengths = np.linalg.norm(markers[0]-markers[1]) # for now only upper side
     print("Calc px2mm using points: ")
     print(f"{markers[1]} and {markers[2]}")
@@ -73,6 +69,23 @@ def calcPx2mmConversion(markers, upperSideLength_mm):
     px2mm = upperSideLength_px / upperSideLength_mm
     #print(px2mm)
     return px2mm
+
+def calcCenterPixelCoords(markers):
+    x1, y1 = markers[0]
+    x3, y3 = markers[2]
+    x2, y2 = markers[1]
+    x4, y4 = markers[3]
+
+    # Midpoint of diagonal 1 (1-3) and diagonal 2 (2-4)
+    x13 = (x1 + x3) / 2
+    y13 = (y1 + y3) / 2
+    x24 = (x2 + x4) / 2
+    y24 = (y2 + y4) / 2
+
+    # Average of the two midpoints = center
+    x = (x13 + x24) / 2
+    y = (y13 + y24) / 2
+    return (x, y)
 
 if __name__ == '__main__':
     # turn on cam
@@ -90,8 +103,16 @@ if __name__ == '__main__':
         if cv2.waitKey(10) & 0xFF == ord('q'):
             print("Markers detected: ")
             print(markers)
+            # Order markers
+            markers = sorted(markers, key=lambda x: (x[0], x[1]))
+            print("Markers sorted: ")
+            print(markers)
             px2mm = calcPx2mmConversion(markers, upperSideLength_mm)
             print(px2mm)
+            centerPixel = calcCenterPixelCoords(markers)
+            centerMm = np.array(centerPixel)*px2mm
+            print("Center: ")
+            print(f"Pixel: {centerPixel} Millimeter: {centerMm}")
             webcam.release()
             cv2.destroyAllWindows()
             break

@@ -1,4 +1,5 @@
 """" import relevant scripts and run here """
+""" sudo chmod a+rw /dev/ttyACM0 """
 import cv2
 from BallVelocity import GetVelocity_ImageCoords
 import serial
@@ -41,7 +42,7 @@ if __name__ == '__main__':
     #deviceID = 0
     deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 1.75 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 1.738 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
