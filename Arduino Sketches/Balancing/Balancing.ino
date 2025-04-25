@@ -26,8 +26,8 @@
 
 double SetpointX, InputX, OutputX;
 double SetpointY, InputY, OutputY;
-double KpX = 0.1, KiX = 0, KdX = 0.5;
-double KpY = 0.1, KiY = 0, KdY = 0.5;
+double KpX = 0.1, KiX = 0, KdX = 0.3;
+double KpY = 0.05, KiY = 0, KdY = 0.2;
 double conversion = 1.8;
 
 int Ts = 15;
@@ -128,10 +128,10 @@ void loop() {
     }
   }
 
-  InputX = lowpassFilterX.input(X_current);
-  InputY = lowpassFilterY.input(Y_current);
-  //InputX = X_current;
-  //InputY = Y_current;
+  //InputX = lowpassFilterX.input(X_current);
+  //InputY = lowpassFilterY.input(Y_current);
+  InputX = X_current;
+  InputY = Y_current;
 
   myPIDX.Compute();
   myPIDY.Compute();
