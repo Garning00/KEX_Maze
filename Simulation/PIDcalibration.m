@@ -8,7 +8,7 @@ K_I = 1;
 
 G_plan = (3/5)*g/s^2;
 F = K_P + K_I/s + K_D*s;
-G_motor = ;
+%G_motor = ;
 
 Gc = feedback( F * G_plan, 1 );
 step(Gc);

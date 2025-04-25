@@ -8,8 +8,23 @@
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define dirPin1 2
 #define stepPin1 3
+
+
 #define dirPin2 8
 #define stepPin2 9
+
+
+#define MS1_1 4
+#define MS2_1 5
+#define MS3_1 6
+#define ENABLE_PIN_1 7
+
+#define MS1_2 10
+#define MS2_2 11
+#define MS3_2 12
+#define ENABLE_PIN_2 13
+
+
 #define motorInterfaceType 1
 
 // Create a new instance of the AccelStepper class:
@@ -22,6 +37,26 @@ AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 int newpos1 = 0;
 int newpos2 = 0;
 
+
+void setupMicrostepping() {
+  pinMode(MS1_1, OUTPUT);
+  pinMode(MS2_1, OUTPUT);
+  pinMode(MS3_1, OUTPUT);
+
+  digitalWrite(MS1_1, HIGH);
+  digitalWrite(MS2_1, HIGH);
+  digitalWrite(MS3_1, HIGH);
+
+  pinMode(MS1_2, OUTPUT);
+  pinMode(MS2_2, OUTPUT);
+  pinMode(MS3_2, OUTPUT);
+
+  digitalWrite(MS1_2, HIGH);
+  digitalWrite(MS2_2, HIGH);
+  digitalWrite(MS3_2, HIGH);
+}
+
+
 void resetPosition(){
   stepper1.setCurrentPosition(0);
   stepper2.setCurrentPosition(0);
@@ -32,15 +67,23 @@ void setup() {
   //Serial.setTimeout(50);
   Serial.flush();
 
+  setupMicrostepping();
+
+  pinMode(ENABLE_PIN_1, OUTPUT);
+  digitalWrite(ENABLE_PIN_1, LOW);
+
+  pinMode(ENABLE_PIN_2, OUTPUT);
+  digitalWrite(ENABLE_PIN_2, LOW);
+
   // Initialize position
   resetPosition();
 
   // Set the maximum speed in steps per second:
-  stepper1.setMaxSpeed(200);
-  stepper2.setMaxSpeed(200);
+  stepper1.setMaxSpeed(3200);
+  stepper2.setMaxSpeed(3200);
   //stepper1.setSpeed(200);
-  stepper1.setAcceleration(500);
-  stepper2.setAcceleration(500);
+  stepper1.setAcceleration(1000);
+  stepper2.setAcceleration(1000);
 
   //Serial.write("Starting!");
 }
