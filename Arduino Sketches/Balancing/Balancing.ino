@@ -26,15 +26,19 @@
 
 double SetpointX, InputX, OutputX;
 double SetpointY, InputY, OutputY;
-double KpX = 0.5, KiX = 0.5, KdX = 0.5; 
-double KpY = 0.5, KiY = 0.5, KdY = 0.5; 
+double KpX = 0.1, KiX = 0, KdX = 0.5;
+double KpY = 0.1, KiY = 0, KdY = 0.5;
 double conversion = 1.8;
 
 int Ts = 15;
 
 int InputXfiltered, InputYfiltered;
 
-int X_current = 513, Y_current = 357;
+// Center Point
+int X_desired = 539, Y_desired = 405;
+
+// Initialize variables
+int X_current = X_desired, Y_current = Y_desired;
 
 
 PID myPIDX(&InputX, &OutputX, &SetpointX, KpX, KiX, KdX, DIRECT);
@@ -44,11 +48,11 @@ PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, DIRECT);
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 
-float filterFrequencyX= 4;
-float filterFrequencyY= 2.3;
+float filterFrequencyX = 4;
+float filterFrequencyY = 2.3;
 
-FilterOnePole lowpassFilterX( LOWPASS, filterFrequencyX );
-FilterOnePole lowpassFilterY( LOWPASS, filterFrequencyY );
+FilterOnePole lowpassFilterX(LOWPASS, filterFrequencyX);
+FilterOnePole lowpassFilterY(LOWPASS, filterFrequencyY);
 
 void setupMicrostepping() {
   pinMode(MS1_1, OUTPUT);
@@ -69,9 +73,7 @@ void setupMicrostepping() {
 }
 
 
-
-
-void resetPosition(){
+void resetPosition() {
   stepper1.setCurrentPosition(0);
   stepper2.setCurrentPosition(0);
 }
@@ -84,9 +86,9 @@ void setup() {
 
   pinMode(ENABLE_PIN_2, OUTPUT);
   digitalWrite(ENABLE_PIN_2, LOW);
-  
-  Serial.setTimeout(2); 
-  Serial.begin(19200); 
+
+  Serial.setTimeout(2);
+  Serial.begin(19200);
 
   // Initialize position
   resetPosition();
@@ -98,16 +100,17 @@ void setup() {
   stepper1.setAcceleration(1000);
   stepper2.setAcceleration(1000);
 
-  InputX = 513;
-  InputY = 357;
-  SetpointX = 513; // Center of plane
-  SetpointY = 357; // 
-  
+  // Initialize variables
+  //InputX = X_desired;
+  //InputY = Y_desired;
+  SetpointX = X_desired;  // Center of plane
+  SetpointY = Y_desired;  //
+
 
   myPIDY.SetMode(AUTOMATIC);
   myPIDX.SetMode(AUTOMATIC);
-  myPIDX.SetOutputLimits(-310,310); // (-6, +7) TODO: Convert to steps?
-  myPIDY.SetOutputLimits(-500,500);// (-10, +8) 
+  myPIDX.SetOutputLimits(-250, 250);  //(-310, 310) // (-6, +7) TODO: Convert to steps?
+  myPIDY.SetOutputLimits(-400, 400);  //(-500, 500) // (-10, +8)
   myPIDX.SetSampleTime(Ts);
   myPIDY.SetSampleTime(Ts);
 }
@@ -127,7 +130,8 @@ void loop() {
 
   InputX = lowpassFilterX.input(X_current);
   InputY = lowpassFilterY.input(Y_current);
-  
+  //InputX = X_current;
+  //InputY = Y_current;
 
   myPIDX.Compute();
   myPIDY.Compute();
@@ -140,6 +144,4 @@ void loop() {
 
   stepper1.run();
   stepper2.run();
-
-  
 }
