@@ -19,6 +19,7 @@ def detectionLoop(webcam):
     blue_lower = np.array([100, 90, 100], np.uint8)
     blue_upper = np.array([120, 255, 255], np.uint8)
     # post-it ljusblå-värden: [20, 100, 200],[100, 255, 255]
+    # Lim-blöta post-it ljusblå: [100, 90, 100], [120, 255, 255]
 
     blue_mask = cv2.inRange(hsvFrame, blue_lower, blue_upper)
 
@@ -61,11 +62,13 @@ def detectionLoop(webcam):
 def calcPx2mmConversion(markers, upperSideLength_mm):
     # Order markers
     markers = sorted(markers, key=lambda x: (x[0], x[1]))
-    #print("Markers sorted: ")
-    #print(markers)
+    print("Markers sorted: ")
+    print(markers)
     # sideLengths = np.linalg.norm(markers[0]-markers[1]) # for now only upper side
+    print("Calc px2mm using points: ")
+    print(f"{markers[1]} and {markers[2]}")
     upperSideLength_px = np.sqrt(
-        np.power((markers[1][0] - markers[0][0]), 2) + np.power((markers[1][1] - markers[0][1]), 2))
+        np.power((markers[2][0] - markers[1][0]), 2) + np.power((markers[2][1] - markers[1][1]), 2))
     #print(upperSideLength_px)
     px2mm = upperSideLength_px / upperSideLength_mm
     #print(px2mm)
@@ -73,19 +76,22 @@ def calcPx2mmConversion(markers, upperSideLength_mm):
 
 if __name__ == '__main__':
     # turn on cam
-    deviceID = 0 #"/dev/video2"
+    deviceID = "/dev/video2"
     webcam = cv2.VideoCapture(deviceID)
 
     while(True):
         markers = detectionLoop(webcam)
 
         upperSideLength_mm = 290
-        px2mm = calcPx2mmConversion(markers,upperSideLength_mm)
-        print(px2mm)
+        # Lägg till hantering om inga markers hittas
+        #px2mm = calcPx2mmConversion(markers,upperSideLength_mm)
+        #print(px2mm)
 
         if cv2.waitKey(10) & 0xFF == ord('q'):
             print("Markers detected: ")
             print(markers)
+            px2mm = calcPx2mmConversion(markers, upperSideLength_mm)
+            print(px2mm)
             webcam.release()
             cv2.destroyAllWindows()
             break

@@ -29,7 +29,8 @@ def serialQuery(message):
 
 if __name__ == '__main__':
     # Initialize serial
-    serialName: str = 'COM5' #'/dev/ttyACM0'  # Linux port name
+    #serialName: str = 'COM5' # Windows port name
+    serialName: str = '/dev/ttyACM0'  # Linux port name
     baud: int = 19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
     sleep(1)
@@ -37,9 +38,10 @@ if __name__ == '__main__':
     # Import video and parameters
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
     videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
-    deviceID = 0 #"/dev/video2"
+    #deviceID = 0
+    deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 1.5 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 1.75 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
