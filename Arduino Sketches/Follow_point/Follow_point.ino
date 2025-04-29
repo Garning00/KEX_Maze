@@ -1,6 +1,5 @@
 #include <PID_v1.h>
 #include "AccelStepper.h"
-#include <Filters.h>
 
 #define dirPin1 2
 #define stepPin1 3
@@ -43,12 +42,6 @@ PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, DIRECT);
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
-
-float filterFrequencyX= 4;
-float filterFrequencyY= 2.3;
-
-FilterOnePole lowpassFilterX( LOWPASS, filterFrequencyX );
-FilterOnePole lowpassFilterY( LOWPASS, filterFrequencyY );
 
 void setupMicrostepping() {
   pinMode(MS1_1, OUTPUT);
@@ -130,8 +123,8 @@ void loop() {
     }
   }
 
-  InputX = lowpassFilterX.input(X_current);
-  InputY = lowpassFilterY.input(Y_current);
+  InputX = X_current;
+  InputY = Y_current;
   
 
   myPIDX.Compute();
