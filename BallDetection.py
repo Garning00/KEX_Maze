@@ -76,7 +76,7 @@ def processLight(img):
     # Lite lägre threshold så dyker reflektion i planet upp
     # Måste hantera annat som dyker upp så som: sticker, skruvar och metallstavar!
 
-    cv2.imshow("processLight Thresh", img)
+    #cv2.imshow("processLight Thresh", img)
 
     # Make little bigger for circle detetction (Maybe use other method now?)
     img = cv2.dilate(img, None, iterations=5)

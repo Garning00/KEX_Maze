@@ -26,13 +26,13 @@ def GetVelocity_ImageCoords(frame1,frame2,framerate, lastValidCoords, lastValidV
     # Coords in unsigned uint16, cannot subtract, cast to int
     dx = int(coords2[0])-int(coords1[0])
     dy = int(coords2[1])-int(coords1[1])
-    print(f"(dx,dy): ({dx},{dy})")
+    #print(f"(dx,dy): ({dx},{dy})")
     vx = dx * framerate
     vy = dy * framerate
 
     # Debug draw velocity
     cv2.line(frame2, (coords1[0], coords1[1]),(coords2[0], coords2[1]),(127,0,0),2)
-    cv2.imshow("Velocity", frame2)
+    #cv2.imshow("Velocity", frame2)
 
     return [vx, vy], coords2 # Returns both velocity and last known position (OBS speed in pixels/s)
 
