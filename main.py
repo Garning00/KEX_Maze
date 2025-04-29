@@ -28,6 +28,12 @@ def serialQuery(message):
     message += '\n'
     ser.write(message.encode('ascii'))
 
+def getMouseClick(event,x,y,flags,param):
+    global mouseX,mouseY
+    if event == cv2.EVENT_LBUTTONDOWN:
+        mouseX,mouseY = x,y
+        print(f"mouse click at ({x},{y})")
+
 if __name__ == '__main__':
     # Initialize serial
     #serialName: str = 'COM5' # Windows port name
@@ -42,7 +48,7 @@ if __name__ == '__main__':
     #deviceID = 0
     deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 1.738 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 1.755176 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
@@ -55,7 +61,8 @@ if __name__ == '__main__':
 
     lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
-    
+
+    mouseX, mouseY = 305,233
 
     while True:
         success, img = cap.read()
@@ -73,15 +80,20 @@ if __name__ == '__main__':
         #     print("SystemExit raised: " + str(e.args[0]))
 
         # Convert ImgCoords and velocity to IRL units
-        vel = lastValidImgCoords*px2mm
-        pos = lastValidImgCoords*px2mm
+        #vel = lastValidImgVelocity*px2mm
+        print(f"PosPX: {lastValidImgCoords}px")
+        vel = [e * px2mm for e in lastValidImgVelocity]
+        #pos = lastValidImgCoords*px2mm
+        pos = [e * px2mm for e in lastValidImgCoords]
         #print(f"V: {vel}mm/s Pos: {pos}mm")
-        print(f"Pos: {pos}mm")
-
-        # Send position to arduino via serial
-        serialQuery(f"{pos[0]} {pos[1]}")
+        print(f"PosMM: {pos}mm")
 
         cv2.imshow("Video", imgCurrent)
+        cv2.setMouseCallback("Video", getMouseClick)
+
+        print(f"mouse: {mouseX},{mouseY} and mm {mouseX*px2mm},{mouseY*px2mm}")
+        # Send position to arduino via serial
+        serialQuery(f"{pos[0]} {pos[1]} {mouseX*px2mm} {mouseY*px2mm}")
 
         imgPast = imgCurrent   # Set previous frame variable for next loop
 

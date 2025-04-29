@@ -2,6 +2,12 @@
 
 import cv2
 
+def getMouseClick(event,x,y,flags,param):
+    global mouseX,mouseY
+    if event == cv2.EVENT_LBUTTONDOWN:
+        mouseX,mouseY = x,y
+        print(f"mouse click at ({x},{y})")
+
 # Choose capture device
 cap = cv2.VideoCapture("/dev/video2")  # deviceID Windows: 0 Linux: "/dev/video2" (check ls in cd /dev)
 # Video Capture Properties:
@@ -13,6 +19,7 @@ cap.set(10, 150)  # Brightness
 while True:
     success, img = cap.read()
     cv2.imshow("Video", img)
+    cv2.setMouseCallback("Video",getMouseClick)
 
     #img = img[0:420, 65:580]
     scale = 0.2
