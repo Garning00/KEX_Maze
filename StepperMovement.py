@@ -15,11 +15,11 @@ ser = serial.Serial(serialName, baudrate=baud)#, rtscts=False, dsrdtr=False)  # 
 sleep(1)
 
 if __name__ == '__main__':
-    while(True):
-         message = input()
-         if message == 'stop':
-             break
-         move(message)
+    # while(True):
+    #      message = input()
+    #      if message == 'stop':
+    #          break
+    #      move(message)
 
     #region Keyboard
     # Keyboard måste köras som root: sudo pycharm-community
