@@ -32,10 +32,14 @@ double SetpointY, InputY, OutputY;
 //double KpY = 0.07, KiY = 0.03, KdY = 0.065;
 
 // Constants V2
-double KpX = 0.008, KiX = 0.01, KdX = 0.01;
-double KpY = 0.007, KiY = 0.01, KdY = 0.01;
+//double KpX = 0.008, KiX = 0.01, KdX = 0.02;
+//double KpY = 0.007, KiY = 0.01, KdY = 0.01;
+//double KpY = 0.013, KiY = 0.02, KdY = 0.03;
 //double KpX = 0.0008, KiX = 0, KdX = 0;
-//double KpY = 0.0001, KiY = 0, KdY = 0;
+double KpY = 0.0001, KiY = 0, KdY = 0;
+
+// Constants V3 (litet P --> ingen overshoot, I för e0, D för dämpa oscillation)
+double KpX = 0.0115, KiX = 0.005, KdX = 0;
 
 double conversion = 1.8;
 int stepMode = 2;
@@ -103,8 +107,8 @@ void setup() {
   stepper1.setMaxSpeed(200*stepMode);
   stepper2.setMaxSpeed(200*stepMode);
   //stepper1.setSpeed(200);
-  stepper1.setAcceleration(500*stepMode); // 1000
-  stepper2.setAcceleration(500*stepMode);
+  stepper1.setAcceleration(250*stepMode); // 1000
+  stepper2.setAcceleration(250*stepMode);
 
  // Initialize variables
   //InputX = X_desired;
