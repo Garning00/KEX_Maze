@@ -4,6 +4,8 @@ import cv2
 from BallVelocity import GetVelocity_ImageCoords
 import serial
 from time import sleep
+from matplotlib import pyplot
+import numpy as np
 
 def prepareImage(img):
     img = prepareImageScaleCrop(img)
@@ -36,7 +38,7 @@ def getMouseClick(event,x,y,flags,param):
 
 if __name__ == '__main__':
     # Initialize serial
-    serialName: str = 'COM5' # Windows port name
+    serialName: str = 'COM37' # Windows port name
     #serialName: str = '/dev/ttyACM0'  # Linux port name
     baud: int = 19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
@@ -48,7 +50,7 @@ if __name__ == '__main__':
     deviceID = 0
     #deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 1.755176 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 1.75862 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
@@ -63,6 +65,14 @@ if __name__ == '__main__':
     lastValidImgVelocity = [0, 0]
 
     mouseX, mouseY = 305,233
+
+
+    # save all positions for plotting
+    savedPosx = []
+    savedPosy = []
+    savedRefx = []
+    savedRefy = []
+    # PLOT
 
     while True:
         success, img = cap.read()
@@ -95,7 +105,38 @@ if __name__ == '__main__':
         # Send position to arduino via serial
         serialQuery(f"{pos[0]} {pos[1]} {mouseX*px2mm} {mouseY*px2mm}")
 
+
+        savedPosx.append(lastValidImgCoords[0])
+        savedPosy.append(lastValidImgCoords[1])
+        savedRefx.append(mouseX)
+        savedRefy.append(mouseY)
+        # Plot x/y-position with reference value (use this instead?? https://www.geeksforgeeks.org/how-to-update-a-plot-on-same-figure-during-the-loop/)
+        pyplot.subplot(1,2,1)
+        pyplot.plot(savedPosx, label = "X")
+        pyplot.plot(savedRefx, label = "ref X", linestyle = "--")
+        pyplot.title("X-step")
+        pyplot.subplot(1,2,2)
+        pyplot.plot(savedPosy, label = "Y")
+        pyplot.plot(savedRefy, label = "ref Y", linestyle = "--")
+        pyplot.title("Y-step")
+        pyplot.legend()
+        pyplot.show(block=False)
+        pyplot.pause(0.001)
+        pyplot.clf()
+
         imgPast = imgCurrent   # Set previous frame variable for next loop
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+    pyplot.show()
+    savedPosx = [int(x) for x in savedPosx]
+    savedPosy = [int(x) for x in savedPosy]
+    print("X data:")
+    print(savedPosx)
+    print("Reference X:")
+    print(savedRefx)
+    print("Y data:")
+    print(savedPosy)
+    print("Reference Y:")
+    print(savedRefy)
