@@ -62,9 +62,9 @@ def detectionLoop(webcam):
 def calcPx2mmConversion(markers, upperSideLength_mm):
     # sideLengths = np.linalg.norm(markers[0]-markers[1]) # for now only upper side
     print("Calc px2mm using points: ")
-    print(f"{markers[1]} and {markers[2]}")
+    print(f"{markers[1]} and {markers[3]}")
     upperSideLength_px = np.sqrt(
-        np.power((markers[2][0] - markers[1][0]), 2) + np.power((markers[2][1] - markers[1][1]), 2))
+        np.power((markers[3][0] - markers[1][0]), 2) + np.power((markers[3][1] - markers[1][1]), 2))
     #print(upperSideLength_px)
     px2mm = upperSideLength_px / upperSideLength_mm
     #print(px2mm)
@@ -90,6 +90,7 @@ def calcCenterPixelCoords(markers):
 if __name__ == '__main__':
     # turn on cam
     deviceID = "/dev/video2"
+    deviceID = 0
     webcam = cv2.VideoCapture(deviceID)
 
     while(True):
