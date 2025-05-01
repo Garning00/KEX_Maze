@@ -12,7 +12,7 @@
 #define stepPin2 9
 #define motorInterfaceType 1
 
-// Create a new instance of the AccelStepper class:
+// Create a new instance of the AccelStepper class
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
 

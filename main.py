@@ -36,8 +36,8 @@ def getMouseClick(event,x,y,flags,param):
 
 if __name__ == '__main__':
     # Initialize serial
-    #serialName: str = 'COM5' # Windows port name
-    serialName: str = '/dev/ttyACM0'  # Linux port name
+    serialName: str = 'COM5' # Windows port name
+    #serialName: str = '/dev/ttyACM0'  # Linux port name
     baud: int = 19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
     sleep(1)
@@ -45,8 +45,8 @@ if __name__ == '__main__':
     # Import video and parameters
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
     videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
-    #deviceID = 0
-    deviceID = "/dev/video2"
+    deviceID = 0
+    #deviceID = "/dev/video2"
     framerate = 30
     px2mm = 1.755176 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
