@@ -1,4 +1,6 @@
 """" import relevant scripts and run here """
+import time
+
 """ sudo chmod a+rw /dev/ttyACM0 """
 import cv2
 from BallVelocity import GetVelocity_ImageCoords
@@ -13,7 +15,7 @@ def prepareImage(img):
     return img
 
 def prepareImageScaleCrop(img):
-    scale = 1
+    scale = 0.5
     img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
     #cv2.imshow("Source", img)
 
@@ -29,6 +31,7 @@ def prepareImage2Gray(img):
 def serialQuery(message):
     message += '\n'
     ser.write(message.encode('ascii'))
+    #print("message sent at" + time.ctime())
 
 def getMouseClick(event,x,y,flags,param):
     global mouseX,mouseY
@@ -38,8 +41,8 @@ def getMouseClick(event,x,y,flags,param):
 
 if __name__ == '__main__':
     # Initialize serial
-    serialName: str = 'COM37' # Windows port name
-    #serialName: str = '/dev/ttyACM0'  # Linux port name
+    #serialName: str = 'COM37' # Windows port name
+    serialName: str = '/dev/ttyACM0'  # Linux port name
     baud: int = 19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
     sleep(1)
@@ -47,10 +50,10 @@ if __name__ == '__main__':
     # Import video and parameters
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
     videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
-    deviceID = 0
-    #deviceID = "/dev/video2"
+    #deviceID = 0
+    deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 1.75862 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 0.8724410518 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
@@ -64,7 +67,7 @@ if __name__ == '__main__':
     lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
 
-    mouseX, mouseY = 305,233
+    mouseX, mouseY = 150,120
 
 
     # save all positions for plotting
@@ -72,6 +75,8 @@ if __name__ == '__main__':
     savedPosy = []
     savedRefx = []
     savedRefy = []
+    savedVelx = []
+    savedVely = []
     # PLOT
 
     while True:
@@ -91,45 +96,57 @@ if __name__ == '__main__':
 
         # Convert ImgCoords and velocity to IRL units
         #vel = lastValidImgVelocity*px2mm
-        print(f"PosPX: {lastValidImgCoords}px")
+        #print(f"PosPX: {lastValidImgCoords}px")
         vel = [e * px2mm for e in lastValidImgVelocity]
         #pos = lastValidImgCoords*px2mm
         pos = [e * px2mm for e in lastValidImgCoords]
         #print(f"V: {vel}mm/s Pos: {pos}mm")
-        print(f"PosMM: {pos}mm")
+        #print(f"PosMM: {pos}mm")
 
         cv2.imshow("Video", imgCurrent)
         cv2.setMouseCallback("Video", getMouseClick)
 
-        print(f"mouse: {mouseX},{mouseY} and mm {mouseX*px2mm},{mouseY*px2mm}")
+        #print(f"mouse: {mouseX},{mouseY} and mm {mouseX*px2mm},{mouseY*px2mm}")
         # Send position to arduino via serial
-        serialQuery(f"{pos[0]} {pos[1]} {mouseX*px2mm} {mouseY*px2mm}")
+        serialQuery(f"{round(pos[0],8)} {round(pos[1],8)} {round(mouseX*px2mm,8)} {round(mouseY*px2mm,8)}")
 
+        # baud needs to account for 4+4+4+4 chars = 16
+        # 1/baudrate * chars * 1000 = ms to send message
+        # 1000 / ms per message = message per second
+        # reversed: if we have 30 ms per message and baud 19200 we can have 576 chars
 
         savedPosx.append(lastValidImgCoords[0])
         savedPosy.append(lastValidImgCoords[1])
         savedRefx.append(mouseX)
         savedRefy.append(mouseY)
-        # Plot x/y-position with reference value (use this instead?? https://www.geeksforgeeks.org/how-to-update-a-plot-on-same-figure-during-the-loop/)
-        pyplot.subplot(1,2,1)
-        pyplot.plot(savedPosx, label = "X")
-        pyplot.plot(savedRefx, label = "ref X", linestyle = "--")
-        pyplot.title("X-step")
-        pyplot.subplot(1,2,2)
-        pyplot.plot(savedPosy, label = "Y")
-        pyplot.plot(savedRefy, label = "ref Y", linestyle = "--")
-        pyplot.title("Y-step")
-        pyplot.legend()
-        pyplot.show(block=False)
-        pyplot.pause(0.001)
-        pyplot.clf()
+        savedVelx.append(vel[0])
+        savedVely.append(vel[1])
 
         imgPast = imgCurrent   # Set previous frame variable for next loop
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+    # Plot x/y-position with reference value (use this instead?? https://www.geeksforgeeks.org/how-to-update-a-plot-on-same-figure-during-the-loop/)
+    pyplot.subplot(1, 2, 1)
+    pyplot.plot(savedPosx, label="X")
+    pyplot.plot(savedRefx, label="ref X", linestyle="--")
+    pyplot.title("X-step")
+    pyplot.subplot(1, 2, 2)
+    pyplot.plot(savedPosy, label="Y")
+    pyplot.plot(savedRefy, label="ref Y", linestyle="--")
+    pyplot.title("Y-step")
+    pyplot.legend()
+    pyplot.show(block=False)
+    pyplot.pause(0.001)
+    #pyplot.clf()
+    pyplot.figure(0)
+    pyplot.plot(savedVelx, label="X")
+    pyplot.plot(savedVely, label="Y")
+    pyplot.title("speed [mm/s]")
+    pyplot.legend()
     pyplot.show()
+
     savedPosx = [int(x) for x in savedPosx]
     savedPosy = [int(x) for x in savedPosy]
     print("X data:")
@@ -140,3 +157,5 @@ if __name__ == '__main__':
     print(savedPosy)
     print("Reference Y:")
     print(savedRefy)
+    print("X Speed:")
+    print(savedVelx)
