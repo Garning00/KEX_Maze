@@ -1,5 +1,6 @@
 #include <PID_v1.h>
 #include "AccelStepper.h"
+//#include <Filters.h>
 
 #define dirPin1 2
 #define stepPin1 3
@@ -39,28 +40,38 @@ double SetpointY, InputY, OutputY;
 double KpY = 0.0001, KiY = 0, KdY = 0;
 
 // Constants V3 (litet P --> ingen overshoot, I för e0, D för dämpa oscillation)
-double KpX = 0.0115, KiX = 0.005, KdX = 0;
+//double KpX = 0.0115, KiX = 0.005, KdX = 0;
+double KpX = 0.9, KiX = 0, KdX = 0;
+//double KpY = 0.05, KiY = 0, KdY = 0;
 
 double conversion = 1.8;
 int stepMode = 2;
 
-int Ts = 10;
+int Ts = 33.333; // SerialQuery is sent 30times/s also camera fps is 30 (1000/30=33.3)
 
 int InputXfiltered, InputYfiltered;
 
-// Center Point
-int X_desired = 539, Y_desired = 405;
+// Initial
+int X_desired = 0, Y_desired = 0;
 
 // Initialize variables
 int X_current = X_desired, Y_current = Y_desired;
+bool firstInputRecieved = 0;
 
-
-PID myPIDX(&InputX, &OutputX, &SetpointX, KpX, KiX, KdX, DIRECT);
-PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, DIRECT);
+PID myPIDX(&InputX, &OutputX, &SetpointX, KpX, KiX, KdX, REVERSE); // direction either DIRECT or REVERSE
+PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, REVERSE);
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
+
+// Initializing filters
+//float filterFrequencyX = 0.5;
+//float filterFrequencyY = 2.5;
+
+// Initializing a one pole (RC) lowpass filter
+//FilterOnePole lowpassFilterX(LOWPASS, filterFrequencyX);
+//FilterOnePole lowpassFilterY(LOWPASS, filterFrequencyY);
 
 void setupMicrostepping() {
   pinMode(MS1_1, OUTPUT);
@@ -132,30 +143,42 @@ void loop() {
     X_desired = Serial.parseFloat();
     Y_desired = Serial.parseFloat();
 
-    if (X_desired != "-69" && Y_desired != "-69"){
-        SetpointX = X_desired;
-        SetpointY = Y_desired;
-      }
-
+    SetpointX = X_desired;
+    SetpointY = Y_desired;
     InputX = X_current;
     InputY = Y_current;
+
+    // Filtering touchpanel signal
+    //InputX = lowpassFilterX.input(InputX);
+    //InputY = lowpassFilterY.input(InputY);
+
+    if (!firstInputRecieved){
+    firstInputRecieved = 1;
+    resetPosition();
+    }
 
     while (Serial.available() > 0){
         Serial.read();
       }
     }
 
-  myPIDX.Compute();
-  myPIDY.Compute();
+  // Avoid movements before first desired position is recieved
+  if (firstInputRecieved){
 
-  //int targetX = round(OutputX / conversion);
-  //int targetY = round(OutputY / conversion);
+    myPIDX.Compute();
+    myPIDY.Compute();
 
-  stepper1.moveTo(OutputX);
-  stepper2.moveTo(OutputY);
+    //int targetX = round(OutputX / conversion);
+    //int targetY = round(OutputY / conversion);
 
-  stepper1.run();
-  stepper2.run();
+    stepper1.moveTo(OutputX);
+    stepper2.moveTo(OutputY);
+
+    //Serial.print(OutputX);
+
+    stepper1.run();
+    stepper2.run();
+  }
 
 
 }
