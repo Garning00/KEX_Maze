@@ -41,7 +41,7 @@ def detectionLoop(webcam):
 
     for pic, contour in enumerate(contours):
         area = cv2.contourArea(contour)
-        if (area > 300 and area < 400):
+        if (area > 70 and area < 150): # area 300-400 when image scale = 1
             x, y, w, h = cv2.boundingRect(contour)
             imageFrame = cv2.rectangle(imageFrame, (x, y),
                                        (x + w, y + h),
@@ -62,9 +62,9 @@ def detectionLoop(webcam):
 def calcPx2mmConversion(markers, upperSideLength_mm):
     # sideLengths = np.linalg.norm(markers[0]-markers[1]) # for now only upper side
     print("Calc px2mm using points: ")
-    print(f"{markers[1]} and {markers[3]}")
+    print(f"{markers[0]} and {markers[2]}")
     upperSideLength_px = np.sqrt(
-        np.power((markers[3][0] - markers[1][0]), 2) + np.power((markers[3][1] - markers[1][1]), 2))
+        np.power((markers[2][0] - markers[0][0]), 2) + np.power((markers[2][1] - markers[0][1]), 2))
     #print(upperSideLength_px)
     px2mm = upperSideLength_px / upperSideLength_mm
     #print(px2mm)
@@ -90,7 +90,7 @@ def calcCenterPixelCoords(markers):
 if __name__ == '__main__':
     # turn on cam
     deviceID = "/dev/video2"
-    deviceID = 0
+    #deviceID = 0
     webcam = cv2.VideoCapture(deviceID)
 
     while(True):
