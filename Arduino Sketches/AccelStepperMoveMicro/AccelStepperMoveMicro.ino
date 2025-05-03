@@ -79,13 +79,13 @@ void setup() {
   resetPosition();
 
   // Set the maximum speed in steps per second:
-  stepper1.setMaxSpeed(400);    //2*200
+  stepper1.setMaxSpeed(400);
   stepper2.setMaxSpeed(400);
   //stepper1.setSpeed(200);
-  stepper1.setAcceleration(1000); //2*500
+  stepper1.setAcceleration(1000);
   stepper2.setAcceleration(1000);
 
-  //Serial.write("Starting!");
+  Serial.write("Starting!\n");
 }
 
 void loop() {
@@ -126,11 +126,16 @@ void loop() {
     newpos2 = Serial.parseInt();
     int resetPos = Serial.parseInt();
     // Måste skicka 3 ints "100 0 0" annars blir 1 sek delay (ex skicka endast "100")
-    
+
     // Empty serial buffer
     while (Serial.available() > 0) {
       Serial.read();  // Read and discard remaining characters
     }
+
+    Serial.print("NewPos set to: ");
+    Serial.print(newpos1);
+    Serial.print(",");
+    Serial.println(newpos2);
 
     /*
     Serial.print("Motor 1: ");
