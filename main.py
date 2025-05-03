@@ -31,6 +31,7 @@ def prepareImage2Gray(img):
 def serialQuery(message):
     message += '\n'
     ser.write(message.encode('ascii'))
+    print("Message sent: " + message)
     #print("message sent at" + time.ctime())
 
 def getMouseClick(event,x,y,flags,param):
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     #deviceID = 0
     deviceID = "/dev/video2"
     framerate = 30
-    px2mm = 0.8724410518 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    px2mm = 0.872441051775 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
     cap.set(3, 640)     # Width
@@ -62,12 +63,14 @@ if __name__ == '__main__':
 
     # Initiate first frame to compare distance
     success, imgPast = cap.read()
+    # Save first frame for later plot (Plane is flat as this point)
+    imgPosPlot = prepareImageScaleCrop(imgPast)
     imgPast = prepareImage(imgPast)
 
     lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
 
-    mouseX, mouseY = 150,120
+    mouseX, mouseY = 160,25
 
 
     # save all positions for plotting
@@ -108,7 +111,10 @@ if __name__ == '__main__':
 
         #print(f"mouse: {mouseX},{mouseY} and mm {mouseX*px2mm},{mouseY*px2mm}")
         # Send position to arduino via serial
-        serialQuery(f"{round(pos[0],8)} {round(pos[1],8)} {round(mouseX*px2mm,8)} {round(mouseY*px2mm,8)}")
+        # in mm:s
+        #serialQuery(f"{round(pos[0],8)} {round(pos[1],8)} {round(mouseX*px2mm,8)} {round(mouseY*px2mm,8)}")
+        # in px:s
+        serialQuery(f"{lastValidImgCoords[0]} {lastValidImgCoords[1]} {mouseX} {mouseY}")
 
         # baud needs to account for 4+4+4+4 chars = 16
         # 1/baudrate * chars * 1000 = ms to send message
@@ -159,3 +165,12 @@ if __name__ == '__main__':
     print(savedRefy)
     print("X Speed:")
     print(savedVelx)
+
+    # Plot image of plane with recorded position data
+    for i in range(len(savedPosx)):
+        cv2.circle(imgPosPlot, (savedPosx[i],savedPosy[i]), 2, (0, 0, 255), 2)
+    cv2.imshow("Recorded Positions", imgPosPlot)
+
+    # Save film?
+
+    cv2.waitKey(0)
