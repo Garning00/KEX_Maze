@@ -15,11 +15,17 @@ ser = serial.Serial(serialName, baudrate=baud)#, rtscts=False, dsrdtr=False)  # 
 sleep(1)
 
 if __name__ == '__main__':
-    while (True):
-        message = input()
-        if message == 'stop':
-            break
-        move(message)
+    # Recieve serial messages from arduino
+    #while True:
+        #if ser.in_waiting > 0:  # while ser.in_waiting: Or while ser.inWaiting(): depending on python version
+         #print("Arduino: " + ser.readline())
+
+
+    # while (True):
+    #     message = input()
+    #     if message == 'stop':
+    #         break
+    #     move(message)
 
     #region Keyboard
     # Keyboard måste köras som root: sudo pycharm-community
@@ -44,7 +50,7 @@ if __name__ == '__main__':
             if event.name == "left":
                 Mstep2 -= 1
 
-            #print(f"{Mstep1} {Mstep2} 0")
+            print(f"{Mstep1} {Mstep2} 0")
             move(f"{Mstep1} {Mstep2} 0")
 
     keyboard.hook(on_key_event)
