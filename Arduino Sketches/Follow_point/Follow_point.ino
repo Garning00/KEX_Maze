@@ -37,17 +37,25 @@ double SetpointY, InputY, OutputY;
 //double KpY = 0.007, KiY = 0.01, KdY = 0.01;
 //double KpY = 0.013, KiY = 0.02, KdY = 0.03;
 //double KpX = 0.0008, KiX = 0, KdX = 0;
-double KpY = 0.0001, KiY = 0, KdY = 0;
+//double KpY = 0.0001, KiY = 0, KdY = 0;
 
 // Constants V3 (litet P --> ingen overshoot, I för e0, D för dämpa oscillation)
 //double KpX = 0.0115, KiX = 0.005, KdX = 0;
-double KpX = 0.9, KiX = 0, KdX = 0;
-//double KpY = 0.05, KiY = 0, KdY = 0;
+
+// Constants (slow stable solve)
+double KpX = 0.1, KiX = 0.01, KdX = 0;
+double KpY = 0.1, KiY = 0.01, KdY = 0;
+
+// Constants fast solve (crash into wall, needs good waypoint placement)
+//double KpX = 0.5, KiX = 0.1, KdX = 0;
+//double KpY = 0, KiY = 0, KdY = 0;
+
 
 double conversion = 1.8;
 int stepMode = 2;
 
-int Ts = 33.333; // SerialQuery is sent 30times/s also camera fps is 30 (1000/30=33.3)
+int Ts = 50;//33.333; // SerialQuery is sent 30times/s also camera fps is 30 (1000/30=33.3)
+                 // Although message only recieved on arduino every 50-70 ms
 
 int InputXfiltered, InputYfiltered;
 
@@ -58,8 +66,11 @@ int X_desired = 0, Y_desired = 0;
 int X_current = X_desired, Y_current = Y_desired;
 bool firstInputRecieved = 0;
 
-PID myPIDX(&InputX, &OutputX, &SetpointX, KpX, KiX, KdX, REVERSE); // direction either DIRECT or REVERSE
-PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, REVERSE);
+unsigned long timeMessage, lastMessage, timeSinceLastMessage;
+unsigned long timeTimeout = 2000;
+
+PID myPIDX(&InputX, &OutputX, &SetpointX, KpX, KiX, KdX, DIRECT); // direction either DIRECT or REVERSE
+PID myPIDY(&InputY, &OutputY, &SetpointY, KpY, KiY, KdY, DIRECT);
 
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
@@ -134,14 +145,21 @@ void setup() {
   myPIDY.SetOutputLimits(-15*stepMode,15*stepMode);// (-10, +8)
   myPIDX.SetSampleTime(Ts);
   myPIDY.SetSampleTime(Ts);
+
+  Serial.write("Starting!\n");
 }
 
 void loop() {
   if (Serial.available()) {
-    X_current = Serial.parseFloat();
-    Y_current = Serial.parseFloat();
-    X_desired = Serial.parseFloat();
-    Y_desired = Serial.parseFloat();
+    timeMessage = millis();
+    timeSinceLastMessage = timeMessage - lastMessage;
+    Serial.write("Time since last message: ");
+    Serial.println(timeSinceLastMessage);
+
+    X_current = Serial.parseInt(); // ParseFloat if sending in mm and ParseInt if pixel
+    Y_current = Serial.parseInt();
+    X_desired = Serial.parseInt();
+    Y_desired = Serial.parseInt();
 
     SetpointX = X_desired;
     SetpointY = Y_desired;
@@ -151,6 +169,14 @@ void loop() {
     // Filtering touchpanel signal
     //InputX = lowpassFilterX.input(InputX);
     //InputY = lowpassFilterY.input(InputY);
+    Serial.write("Recieved values: ");
+    Serial.print(X_current);
+    Serial.write(",");
+    Serial.print(Y_current);
+    Serial.write(" ");
+    Serial.print(X_desired);
+    Serial.write(",");
+    Serial.println(Y_desired);
 
     if (!firstInputRecieved){
     firstInputRecieved = 1;
@@ -160,10 +186,14 @@ void loop() {
     while (Serial.available() > 0){
         Serial.read();
       }
+
+    // LÄGG TILL TIME SINCE LAST MESSAGE
+    // --> stänger av sig själv efter ett tag.
+    lastMessage = timeMessage;
     }
 
   // Avoid movements before first desired position is recieved
-  if (firstInputRecieved){
+  if (firstInputRecieved && millis() - lastMessage < timeTimeout){
 
     myPIDX.Compute();
     myPIDY.Compute();
@@ -171,13 +201,22 @@ void loop() {
     //int targetX = round(OutputX / conversion);
     //int targetY = round(OutputY / conversion);
 
-    stepper1.moveTo(OutputX);
-    stepper2.moveTo(OutputY);
 
-    //Serial.print(OutputX);
+    if (stepper1.currentPosition() != OutputX || stepper2.currentPosition() != OutputY){
+      Serial.write("PID computed output: ");
+      Serial.print(OutputX);
+      Serial.write(",");
+      Serial.println(OutputY);
 
-    stepper1.run();
-    stepper2.run();
+      // Pid kan ge decimalvärde --> kanske behöver round
+
+      stepper1.moveTo(OutputX);
+      stepper2.moveTo(OutputY);
+      //Serial.print(OutputX);
+
+      stepper1.run();
+      stepper2.run();
+    }
   }
 
 
