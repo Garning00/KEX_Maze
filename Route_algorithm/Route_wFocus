@@ -1,0 +1,79 @@
+import numpy as np 
+import cv2 
+
+
+path = r'captured_image.jpg'
+
+font = cv2.FONT_HERSHEY_COMPLEX 
+img2 = cv2.imread(path, cv2.IMREAD_COLOR) 
+  
+img = cv2.imread(path) 
+
+cv2.waitKey(0) 
+  
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+  
+edged = cv2.Canny(gray, 80, 115) 
+cv2.waitKey(0) 
+  
+contours, hierarchy = cv2.findContours(edged,  
+    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+
+contour = max(contours, key = cv2.contourArea)
+
+approx = cv2.approxPolyDP(contour, 0.00001 * cv2.arcLength(contour, True), True) 
+
+coords = approx.reshape(-1, 2)
+
+start_target = np.array([290, 39]) #290, 39 Lvl 1; 322, 53 Lvl 2
+finish_target = np.array([256, 414]) #256, 414 Lvl 1; 292 425 Lvl 2 
+matches = np.where((coords == start_target).all(axis=1))[0]
+if matches.size > 0:
+    start_idx = matches[0]  # safely extract the first match
+else:
+    raise ValueError("start_target not found in coords")
+
+finish_idx = int(np.where((coords == finish_target).all(axis=1))[0])
+
+
+
+if start_idx > finish_idx:
+    n = coords[finish_idx:start_idx+1]
+else: 
+    n = coords[start_idx:finish_idx+1]
+
+
+n_1 = n.reshape(-1, 1, 2)
+
+# draws boundary of contours. 
+#cv2.drawContours(img2, [coords], 0, (0, 0, 255), 1)  
+cv2.drawContours(img2, n_1, 0, (0, 0, 255), 1)
+
+# Used to flatted the array containing 
+# the co-ordinates of the vertices. 
+n = n.ravel()
+
+#print(n)
+i = 0
+
+x_all = []
+y_all = []
+
+for i in range(0, len(n), 34): #80 (Lvl 1); 40 (Lvl 3)
+    x = n[i]
+    x_all.append(x)
+    y = n[i + 1]
+    y_all.append(y)
+    string = f"{x},{y}"
+    cv2.putText(img2, string, (x, y), font, 0.5, (0, 255, 0), 1)
+
+print(x_all)
+
+# Showing the final image. 
+cv2.imshow('image2', img2)  
+
+cv2.drawContours(img, contour, -1, (0, 255, 0), 3) 
+ 
+cv2.imshow('Contours', img) 
+cv2.waitKey(0) 
+cv2.destroyAllWindows() 
