@@ -1,15 +1,19 @@
 import numpy as np 
-import cv2 
+import cv2
+from main import prepareImageScaleCrop
 
 
 
 
-path = r'captured_image_2.jpg'
+#path = r'captured_image_2.jpg'
+path = "../KEX_Bilder/BRIO Labyrint/Lvl1_Flat_NoBall.png"
 
 font = cv2.FONT_HERSHEY_COMPLEX 
-img2 = cv2.imread(path, cv2.IMREAD_COLOR) 
-  
-img = cv2.imread(path) 
+img2 = cv2.imread(path, cv2.IMREAD_COLOR)
+img = cv2.imread(path)
+
+img = prepareImageScaleCrop(img)
+img2 = prepareImageScaleCrop(img2)
 
 cv2.waitKey(0) 
   
