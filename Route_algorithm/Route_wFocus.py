@@ -122,8 +122,9 @@ i = 0
 x_all = []
 y_all = []
 
-# 34 är antalet steg GÖR VARIABEL
-for i in range(0, len(n), 34): #80 (Lvl 1); 40 (Lvl 3)
+# Interpolate points
+stepLength = 34
+for i in range(0, len(n), stepLength): #80 (Lvl 1); 40 (Lvl 3)
     x = n[i]
     x_all.append(x)
     y = n[i + 1]
@@ -132,6 +133,8 @@ for i in range(0, len(n), 34): #80 (Lvl 1); 40 (Lvl 3)
     cv2.putText(img2, string, (x, y), font, 0.5, (0, 255, 0), 1)
 
 print(x_all)
+print(y_all)
+print(list(zip(x_all, y_all)))
 
 # Showing the final image. 
 cv2.imshow('image2', img2)  
