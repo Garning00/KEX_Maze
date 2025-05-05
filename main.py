@@ -31,7 +31,7 @@ def prepareImage2Gray(img):
 def serialQuery(message):
     message += '\n'
     ser.write(message.encode('ascii'))
-    print("Message sent: " + message)
+    #print("Message sent: " + message)
     #print("message sent at" + time.ctime())
 
 def getMouseClick(event,x,y,flags,param):
@@ -39,6 +39,12 @@ def getMouseClick(event,x,y,flags,param):
     if event == cv2.EVENT_LBUTTONDOWN:
         mouseX,mouseY = x,y
         print(f"mouse click at ({x},{y})")
+
+def draw_cross(img, center, size, color, thickness):
+    x, y = center
+    half = size // 2
+    cv2.line(img, (x - half, y), (x + half, y), color, thickness)
+    cv2.line(img, (x, y - half), (x, y + half), color, thickness)
 
 if __name__ == '__main__':
     # Initialize serial
@@ -55,17 +61,30 @@ if __name__ == '__main__':
     deviceID = "/dev/video2"
     framerate = 30
     px2mm = 0.872441051775 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
+    frame_width = 640
+    frame_height = 480
+    scale = 0.5
+    vidResultSavePath = "KEX_Bilder/BRIO Labyrint/Results/"
 
     cap = cv2.VideoCapture(deviceID) # Choose videoPath or DeviceID
-    cap.set(3, 640)     # Width
-    cap.set(4, 480)     # Height
+    cap.set(3, frame_width)     # Width
+    cap.set(4, frame_height)     # Height
     cap.set(10, 150)    # Brightness
 
     # Initiate first frame to compare distance
     success, imgPast = cap.read()
-    # Save first frame for later plot (Plane is flat as this point)
-    imgPosPlot = prepareImageScaleCrop(imgPast)
+    #imgPosPlot = prepareImageScaleCrop(imgPast) # Save first frame for later plot (Plane is flat as this point)
     imgPast = prepareImage(imgPast)
+    imgPosPlot = imgPast # Save gray img instead
+
+    # Save video
+    #size = (frame_width,frame_height)
+    #size = [int(e / 2) for e in size]
+    vidResult = cv2.VideoWriter(f'{vidResultSavePath}Run@{time.ctime()}.avi',
+                         cv2.VideoWriter_fourcc(*'MJPG'),
+                         framerate, (int(frame_width*scale),int(frame_height*scale)), isColor=False) # !!! To get output you need to release, have correct dimensions and set isColor correctly
+    if not vidResult.isOpened():
+        print("Failed to open VideoWriter")
 
     lastValidImgCoords = [0,0]#None
     lastValidImgVelocity = [0, 0]
@@ -73,19 +92,21 @@ if __name__ == '__main__':
     mouseX, mouseY = 160,25
 
 
-    # save all positions for plotting
+    # Initialize all positions for plotting
     savedPosx = []
     savedPosy = []
     savedRefx = []
     savedRefy = []
     savedVelx = []
     savedVely = []
-    # PLOT
 
     while True:
         success, img = cap.read()
 
         imgCurrent = prepareImage(img)
+
+        # Write frame to file
+        vidResult.write(imgCurrent)
 
         lastValidImgVelocity, lastValidImgCoords = GetVelocity_ImageCoords(imgPast, imgCurrent, framerate, lastValidImgCoords, lastValidImgVelocity)
         #print(f"LastVel: {lastValidImgVelocity} Last Coords: {lastValidImgCoords}")
@@ -167,10 +188,20 @@ if __name__ == '__main__':
     print(savedVelx)
 
     # Plot image of plane with recorded position data
+    imgPosPlot = cv2.cvtColor(imgPosPlot, cv2.COLOR_GRAY2BGR) # Convert back to BGR to plot colors
     for i in range(len(savedPosx)):
-        cv2.circle(imgPosPlot, (savedPosx[i],savedPosy[i]), 2, (0, 0, 255), 2)
+        cv2.circle(imgPosPlot, (savedPosx[i],savedPosy[i]), 2, (255, 0, 0), 2)
+    # Plot reference positions
+    for i in range(len(savedRefx)):
+        if savedRefx[i] != savedRefx[i-1]:
+            #cv2.circle(imgPosPlot, (savedRefx[i], savedRefy[i]), 2, (0, 255, 0), 2)
+            draw_cross(imgPosPlot, (savedRefx[i], savedRefy[i]),10,(0,0,255),2)
     cv2.imshow("Recorded Positions", imgPosPlot)
 
-    # Save film?
 
+    # Save film (https://www.geeksforgeeks.org/saving-a-video-using-opencv/)
+
+    cap.release()
+    vidResult.release()
+    #cv2.destroyAllWindows()
     cv2.waitKey(0)
