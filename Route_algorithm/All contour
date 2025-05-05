@@ -1,0 +1,45 @@
+
+import numpy as np 
+import cv2 
+
+
+path = r'c:\Users\lucas\OneDrive\Desktop\MEK KEX\KEX_Maze\KEX_Bilder\BRIO Labyrint\Lvl1_Flat_NoBall.PNG' #Level 1
+#path = r'c:\Users\lucas\OneDrive\Desktop\MEK KEX\KEX_Maze\KEX_Bilder\BRIO Labyrint\Lvl2_Flat_NoBall.PNG' #Level 2
+#path = r'c:\Users\lucas\OneDrive\Desktop\MEK KEX\KEX_Maze\KEX_Bilder\BRIO Labyrint\Lvl3_Flat_NoBall.PNG' #Level 3
+font = cv2.FONT_HERSHEY_COMPLEX 
+img2 = cv2.imread(path, cv2.IMREAD_COLOR) 
+  
+img = cv2.imread(path) 
+cv2.waitKey(0) 
+  
+# Grayscale 
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) 
+  
+# Find Canny edges 
+edged = cv2.Canny(gray, 70, 115) 
+cv2.waitKey(0) 
+  
+# Finding Contours 
+# Use a copy of the image e.g. edged.copy() 
+# since findContours alters the image 
+contours, hierarchy = cv2.findContours(edged,  
+    cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE) 
+
+contour = max(contours, key = cv2.contourArea)
+
+cv2.imshow('Canny Edges After Contouring', edged) 
+cv2.waitKey(0) 
+  
+print("Number of Contours found = " + str(len(contours))) 
+  
+# Draw all contours 
+# -1 signifies drawing all contours 
+cv2.drawContours(img2, contours, -1, (0, 255, 0), 3) 
+  
+cv2.imshow('Contours', img2) 
+cv2.waitKey(0) 
+
+cv2.drawContours(img, contour, -1, (0, 255, 0), 3) 
+cv2.imshow('big contour', img) 
+cv2.waitKey(0) 
+cv2.destroyAllWindows() 
