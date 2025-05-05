@@ -43,8 +43,9 @@ double SetpointY, InputY, OutputY;
 //double KpX = 0.0115, KiX = 0.005, KdX = 0;
 
 // Constants (slow stable solve)
-double KpX = 0.1, KiX = 0.01, KdX = 0;
-double KpY = 0.1, KiY = 0.01, KdY = 0;
+double KpX = 0.085, KiX = 0.007, KdX = 0.052;
+double KpY = 0.09, KiY = 0.08, KdY = 0.07;
+//double KpX = 0.05, KiX = 0.0005, KdX = 0.06;
 
 // Constants fast solve (crash into wall, needs good waypoint placement)
 //double KpX = 0.5, KiX = 0.1, KdX = 0;
