@@ -52,3 +52,5 @@ This is the distance between the center points of the two top most markers in th
 * Selecting correct serial port name, Linux uses something like: "/dev/ttyACM0" and for Windows: "COM4".
 * Use same baudrate in Python as in the Arduino sketch.
 * On linux serial port must be granted permission using "sudo chmod a+rw /dev/ttyACM0" (replace with correct port name).
+### Other
+* There's currently no code to recieve serial messages in python sent from arduino. This might then cause the program to stall if not accompanied with serial monitor in Arduino IDE (Python might be needed to run as admin to work)
