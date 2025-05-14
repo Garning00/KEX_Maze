@@ -43,8 +43,13 @@ double SetpointY, InputY, OutputY;
 //double KpX = 0.0115, KiX = 0.005, KdX = 0;
 
 // Constants (slow stable solve)
-double KpX = 0.085, KiX = 0.007, KdX = 0.052;
-double KpY = 0.09, KiY = 0.08, KdY = 0.07;
+//double KpX = 0.085, KiX = 0.007, KdX = 0.052;
+//double KpY = 0.09, KiY = 0.08, KdY = 0.07;
+
+//Ver 4 (KEXPO)
+double KpX = 0.15, KiX = 0.0075, KdX = 0.052;
+double KpY = 0.15, KiY = 0.085, KdY = 0.07;
+
 //double KpX = 0.05, KiX = 0.0005, KdX = 0.06;
 
 // Constants fast solve (crash into wall, needs good waypoint placement)
@@ -55,8 +60,8 @@ double KpY = 0.09, KiY = 0.08, KdY = 0.07;
 double conversion = 1.8;
 int stepMode = 2;
 
-int Ts = 50;//33.333; // SerialQuery is sent 30times/s also camera fps is 30 (1000/30=33.3)
-                 // Although message only recieved on arduino every 50-70 ms
+int Ts = 33.333; // SerialQuery is sent 30times/s also camera fps is 30 (1000/30=33.3)
+                 // Although message only received on arduino every 20-40 ms, mostly 33 ms, risk of missing a message? (before w 19200 baud: 50-70 ms)
 
 int InputXfiltered, InputYfiltered;
 
@@ -120,7 +125,7 @@ void setup() {
   pinMode(ENABLE_PIN_2, OUTPUT);
   digitalWrite(ENABLE_PIN_2, LOW);
 
-  Serial.begin(19200);
+  Serial.begin(38400);//19200);
   Serial.flush();
 
   // Initialize position
@@ -185,7 +190,9 @@ void loop() {
     }
 
     while (Serial.available() > 0){
-        Serial.read();
+        //Serial.read();
+        char c = Serial.read();
+        if (c == '\n') break;  // Discard remaining junk in line
       }
 
     // LÄGG TILL TIME SINCE LAST MESSAGE
