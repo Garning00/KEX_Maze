@@ -59,7 +59,7 @@ if __name__ == '__main__':
     # Initialize serial
     #serialName: str = 'COM37' # Windows port name
     serialName: str = '/dev/ttyACM0'  # Linux port name
-    baud: int = 19200
+    baud: int = 38400#19200
     ser = serial.Serial(serialName, baudrate=baud)  # , rtscts=False, dsrdtr=False)  # open serial port
     time.sleep(1)
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     videoPath = "KEX_Bilder/Top-Toy Labyrint/Video_Flash02.mp4"
     videoPath = "KEX_Bilder/BRIO Labyrint/Video_Lvl3.avi"
     #deviceID = 0
-    deviceID = "/dev/video0"
+    deviceID = "/dev/video2"
     framerate = 30
     px2mm = 0.872441051775 # Convertion rate from pixles to real world units (gathered from ColorDetection.py)
     frame_width = 640
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     vidResultSavePath = "KEX_Bilder/BRIO Labyrint/Results/"
 
     pointIndex = 0
-    pointList = [(126, 205), (214, 198), (232, 185), (264, 177), (253, 132), (267, 93), (262, 68), (249, 35), (194, 24), (209, 56), (190, 85), (167, 97), (147, 120), (180, 160), (145, 172), (112, 163), (47, 188), (50, 154), (67, 131), (108, 130), (123, 102), (103, 82), (72, 79), (48, 79), (61, 84), (91, 79), (101, 84), (62, 86), (40, 78), (41, 75), (46, 38)]
+    pointList = [(124, 203), (142, 204), (223, 176), (258, 182), (262, 137), (266, 98), (263, 69), (256, 37), (201, 18), (205, 47), (196, 82), (176, 91), (150, 106), (181, 136), (144, 174), (115, 163), (81, 188), (51, 154), (64, 133), (102, 131), (124, 103), (104, 82), (64, 83), (42, 51), (66, 20)]
     mouseSetpoint = (160,25)
     setpointMode = "mouse" #"mouse" or "list"
 
