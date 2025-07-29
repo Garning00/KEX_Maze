@@ -38,9 +38,9 @@ Reads video feed, performs initial image processing and cropping and calls GetVe
 The position is sent to Arduino together with the setpoint (dependent on input mode) using serialQuery function. Serial communication is handled using the Pyserial Python library.
 
 ### Line/Route Detection
-* **Route_wFocus**
+* **Route_wFocus**  
 Finds the drawn route on the maze using OpenCV canny edge detection and contour finding. Mouse-clicking on start and end point in the camera window enables sorting the data points. Final list of points is printed and can be inserted into main.py for line-following.
-* **Route_algorithm**
+* **Route_algorithm**  
 Used for testing finding correct parameters to detect the path. Lacks sorting of data points and inputting endpoints using mouse-click.
 
 ## Setup procedure
